@@ -8,7 +8,8 @@ export default class Inventory extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            selectedItems: []
+            selectedItems: [],
+            showAddForm: false
         }
     }
 
@@ -21,24 +22,22 @@ export default class Inventory extends Component {
         });
     }
 
-    render = () => {
+    render() {
         const { inventory } = this.props;
         var isDisabled = (this.state.selectedItems.length > 0) ? "" : "disabled";
 
         return (
             <div className="container">
                 <h1 className="page-header">Inventory Management</h1>
-                <InventoryAddForm onAddInventory={this.props.addInventory}/>
                 <div className="form-group">
-                    <button className="btn btn-primary" disabled={isDisabled}
-                            onClick={this.addQuantity.bind(this)}>Add
-                        Quantity
+                    <button className="btn btn-primary"
+                            onClick={this.addQuantity.bind(this)}> +
                     </button>
                     <button className="btn btn-danger" disabled={isDisabled}
-                            onClick={this.removeQuantity.bind(this)}>Remove
-                        Quantity
+                            onClick={this.removeQuantity.bind(this)}>  -
                     </button>
                 </div>
+                {this.state.showAddForm ? <InventoryAddForm onAddInventory={this.addInventoryItem.bind(this)}/> : ""}
                 <div className="row">
                     {inventory.length > 0 ? "Showing " + inventory.length + " entries" : "No items to display"}
                 </div>
@@ -46,7 +45,15 @@ export default class Inventory extends Component {
             </div>)
     }
 
-    onSelectItem = (id) => {
+    addInventoryItem(newItem) {
+        this.props.addInventory(newItem);
+        const { showAddForm } = this.state;
+        this.setState({
+            showAddForm: !showAddForm
+        });
+    }
+
+    onSelectItem(id) {
         var selectedItems = [];
         var index = this.state.selectedItems.indexOf(id);
         if (index !== -1) {
@@ -62,13 +69,20 @@ export default class Inventory extends Component {
         })
     }
 
-    addQuantity = () => {
-        this.props.incrementQuantity({
-            ids: this.state.selectedItems
-        });
+    addQuantity() {
+        const {selectedItems, showAddForm } = this.state;
+        if (selectedItems.length === 0) {
+            this.setState({
+                showAddForm: !showAddForm
+            })
+        } else {
+            this.props.incrementQuantity({
+                ids: this.state.selectedItems
+            });
+        }
     }
 
-    removeQuantity = () => {
+    removeQuantity() {
         this.props.decrementQuantity({
             ids: this.state.selectedItems
         });
